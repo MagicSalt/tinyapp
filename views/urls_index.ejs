@@ -6,7 +6,6 @@
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
-
     <!-- Bootstrap CSS -->
     <link
       rel="stylesheet"
@@ -36,12 +35,12 @@
                 <form method="GET" action="/urls/<%= id %>">
                   <button type="submit" class="btn btn-primary">Edit</button>
                 </form>
-              </td>
-              <td>
-                <form method="POST" action="/urls/<%= id %>/delete">
-                  <button type="submit" class="btn btn-primary">Delete</button>
-                </form>
-              </td>
+            </td>
+            <td>
+              <form method="POST" action="/urls/<%= id %>/delete">
+                <button type="submit" class="btn btn-primary">Delete</button>
+              </form>
+            </td>
             </tr>
           <% } %>
         </tbody>
