@@ -21,6 +21,7 @@
       <%- include('partials/_header') %>
     </header>
     <main style="margin: 1em;">
+      <% if (user) { %>
       <h3>My URLs</h3>
       <table class="table">
         <thead>
@@ -33,7 +34,7 @@
           <% for (let id in urls) { %>
             <tr>
               <td><%= id %></td>
-              <td><%= urls[id] %></td>
+              <td><%= urls[id].longURL %></td>
               <td>
                 <form method="GET" action="/urls/<%= id %>">
                   <button type="submit" class="btn btn-primary">Edit</button>
@@ -48,8 +49,19 @@
           <% } %>
         </tbody>
       </table>
+      <% } else { %>
+        <h3 style="text-align: center">You need to login or register to access this page!</h3>
+        <div class="form-inline justify-content-center"></div>
+          <form class="form-inline" action="/login" method="GET">
+            <button type="submit" class="btn btn-info" style="margin-right: 2em; margin-top: 3em;">Login</button>
+          </form>
+          <form class="form-inline" action="/register" method="GET">
+            <buton type="submit" class="btn btn-info" style="margin-top: 3em;">Register</buton>
+          </form>
+        </div>
+        <% } %>
     </main>
-    
+
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

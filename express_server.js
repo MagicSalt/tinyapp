@@ -1,7 +1,7 @@
-const cookieParser = require("cookie-parser");
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const cookieParser = require("cookie-parser");
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -13,8 +13,8 @@ function generateRandomString() {
 };
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
+  "9sm5xK": { longURL: "http://www.google.com", userID: "user2RandomID" }
 };
 
 const users = {
@@ -52,6 +52,16 @@ const checkPassword = (user, password) => {
   }
 };
 
+const urlsForUser = (id) => {
+  let filtered = {};
+  for (let urlID of Object.keys(urlDatabase)) {
+    if (urlDatabase[urlID].userID === id) {
+      filtered[urlID] = urlDatabase[urlID];
+    }
+  }
+  return filtered;
+};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -61,25 +71,34 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
+app.get('/urls2.json', (req, res) => {
+  res.json(users);
+});
+
 app.get('/hello', (req, res) => {
   res.send('<html><body>Hello <b>World</b></body></html>\n');
 });
 
 app.get('/urls', (req, res) => {
-  const templateVars = {
+  const templateVars = { 
     user: users[req.cookies['user_id']],
-    urls: urlDatabase,
-   };
-  res.render('urls_index', templateVars);
+    urls: urlsForUser(req.cookies['user_id'])
+  };
+  res.render("urls_index", templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
   const templateVars = { user: users[req.cookies['user_id']] };
-  res.render('urls_new', templateVars);
+  if (templateVars.user) {
+    res.render('urls_new', templateVars);
+  } else {
+    res.render('urls_login', templateVars);
+  }
 });
 
 app.post('/urls', (req, res) => {
   const longURL = req.body.longURL;
+  const userID = req.cookies['user_id'];
   const id = generateRandomString();
   urlDatabase[id] = longURL;
   res.redirect(`/urls/${id}`);
@@ -89,26 +108,39 @@ app.get('/urls/:id', (req, res) => {
   const templateVars = { 
     users: users[req.cookies['user_id']],
     id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[req.params.id].longURL,
   };
-  res.render('urls_show', templateVars);
+  if (req.cookies["user_id"] === urlDatabase[templateVars.id].userID) {
+    res.render("urls_show", templateVars);
+  } else {
+    res.status(400).send("This TinyURL doesn't belong to you!");
+  }
 });
 
 app.get('/u/:id', (req, res) => {
-  const longURL = urlDatabase[req.params.id];
+  const longURL = urlDatabase[req.params.id].longURL;
   res.redirect(longURL);
 });
 
 app.post('/urls/:id/delete', (req, res) => {
-  delete urlDatabase[req.params.id];
-  res.redirect('/urls')
+  const id = req.params.id;
+  if (req.cookies['user_id'] === urlDatabase[id].userID) {
+    delete urlDatabase[req.params.id];
+    res.redirect('/urls');
+  } else {
+    res.status(400).send('You are not allowed to delete that TinyURL!')
+  }
 });
 
 app.post('/urls/:id', (req, res) => {
   const id = req.params.id;
   const longURL = req.body.longURL;
-  urlDatabase[id] = longURL;
-  res.redirect(`/urls/${id}`);
+  if (req.cookies['user_id'] === urlDatabase[id].userID) {
+    urlDatabase[id].longURL = longURL;
+    res.redirect(`/urls/${id}`);
+  } else {
+    res.status(400).send('You are not allowed to edit that TinyURL!')
+  }
 });
 
 app.get('/login', (req, res) => {
@@ -134,9 +166,9 @@ app.post('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-app.get('/register', (req, res) => {
-  const templateVars = { user: users[req.cookies['user_id']] };
-  res.render('urls_register', templateVars);
+app.get("/register", (req,res) => {
+  let templateVars = { user: users[req.cookies["user_id"]] };
+  res.render("urls_register", templateVars);
 });
 
 app.post('/register', (req, res) => {
