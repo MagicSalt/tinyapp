@@ -4,8 +4,9 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["screenshot description"](#)
-!["screenshot description"](#)
+!["urls not-logged in"](https://github.com/MagicSalt/tinyapp/blob/master/docs/urls-notlogged.png?raw=true)
+!["urls logged in"](https://github.com/MagicSalt/tinyapp/blob/master/docs/urls-logged.png?raw=true)
+!["create url page"](https://github.com/MagicSalt/tinyapp/blob/master/docs/urls-new.png?raw=true)
 
 ## Dependencies
 
